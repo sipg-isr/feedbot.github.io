@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="FeedBot: a symbiotic autonomous robotic arm for meal assistance to motion-impaired people. A project of ISR / IST, M-ITI and Carnegie Mellon University.">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="FeedBot — A symbiotic robotic arm for meal assistance">
+<meta property="og:description" content="A fully autonomous mobile arm that feeds people with motor impairments — tasked by vision, adapted to each user.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="img/hero.jpg">
+<title>FeedBot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&amp;display=swap">
+
+<style>
+  :root {
+    --paper:      #F3F5F4;
+    --surface:    #FFFFFF;
+    --text:       #1A2129;
+    --muted:      #5B6B78;
+    --line:       #D7DEDC;
+    --line-soft:  #E7ECEA;
+    --accent:     #0B6E99;
+    --accent-ink: #085775;
+    --accent-bg:  #E4EFF4;
+    --marker:     #B97C12;
+
+    --ink:        #0C1319;
+    --ink-2:      #131D25;
+    --on-ink:     #EDF2F3;
+    --on-ink-dim: #93A6B1;
+    --on-ink-line:#24333D;
+
+    --f-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    --f-body:    "Source Serif 4", Georgia, "Times New Roman", serif;
+    --f-mono:    "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+    --wrap: 1140px;
+    --col: 68ch;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:      #0D1318;
+      --surface:    #141D24;
+      --text:       #E4EAEE;
+      --muted:      #95A5B1;
+      --line:       #263239;
+      --line-soft:  #1C262D;
+      --accent:     #58B6DB;
+      --accent-ink: #8FD1EC;
+      --accent-bg:  #11242E;
+      --marker:     #E0AA3E;
+
+      --ink:        #080D12;
+      --ink-2:      #0F171D;
+      --on-ink:     #E8EEF0;
+      --on-ink-dim: #8798A3;
+      --on-ink-line:#1E2B33;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:      #0D1318;
+    --surface:    #141D24;
+    --text:       #E4EAEE;
+    --muted:      #95A5B1;
+    --line:       #263239;
+    --line-soft:  #1C262D;
+    --accent:     #58B6DB;
+    --accent-ink: #8FD1EC;
+    --accent-bg:  #11242E;
+    --marker:     #E0AA3E;
+
+    --ink:        #080D12;
+    --ink-2:      #0F171D;
+    --on-ink:     #E8EEF0;
+    --on-ink-dim: #8798A3;
+    --on-ink-line:#1E2B33;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--text);
+    font-family: var(--f-body);
+    font-size: 17px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:hover { color: var(--accent-ink); }
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  h1, h2, h3, .ui { font-family: var(--f-display); }
+  h2, h3 { text-wrap: balance; }
+
+  .wrap {
+    max-width: var(--wrap);
+    margin-inline: auto;
+    padding-inline: 20px;
+  }
+
+  /* ---------- top bar ---------- */
+
+  .topbar {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 20;
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .topbar .wrap {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    min-height: 52px;
+  }
+  .mark {
+    font-family: var(--f-display);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--text);
+    text-decoration: none;
+    white-space: nowrap;
+    flex: none;
+  }
+  .mark span { color: var(--accent); }
+  nav.sections {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin-left: auto;
+  }
+  nav.sections::-webkit-scrollbar { display: none; }
+  nav.sections a {
+    font-family: var(--f-display);
+    font-size: 12.5px;
+    letter-spacing: .04em;
+    color: var(--muted);
+    text-decoration: none;
+    white-space: nowrap;
+    padding-block: 15px;
+    border-bottom: 2px solid transparent;
+  }
+  nav.sections a:hover { color: var(--text); }
+  nav.sections a.active { color: var(--text); border-bottom-color: var(--accent); }
+
+  /* ---------- hero ---------- */
+
+  .hero {
+    position: relative;
+    background: var(--ink);
+    color: var(--on-ink);
+    overflow: hidden;
+    border-bottom: 1px solid var(--on-ink-line);
+    min-height: clamp(460px, 72vh, 760px);
+    display: flex;
+    align-items: flex-end;
+  }
+
+  /* background media: a still that is always there, a film that fades in over it */
+  .hero-media {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: var(--ink);
+  }
+  .hero-still {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 58% 22%;
+    filter: grayscale(.34) contrast(1.06) brightness(.82);
+    transform: scale(1.06);
+    animation: drift 34s ease-in-out infinite alternate;
+  }
+  @keyframes drift {
+    from { transform: scale(1.06) translate3d(0, 0, 0); }
+    to   { transform: scale(1.14) translate3d(-2.2%, -1.4%, 0); }
+  }
+  .hero-film {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 52% 42%;
+    display: block;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    pointer-events: none;
+    filter: grayscale(.22) contrast(1.05) brightness(.86) saturate(.9);
+  }
+  .hero-film.on { opacity: 1; }
+
+  /* pause control for the background film */
+  .film-toggle {
+    position: absolute;
+    right: 18px;
+    bottom: 18px;
+    z-index: 2;
+    display: none;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--f-display);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--on-ink);
+    background: color-mix(in srgb, var(--ink) 66%, transparent);
+    border: 1px solid var(--on-ink-line);
+    border-radius: 999px;
+    padding: 7px 13px 7px 10px;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+  }
+  .film-toggle.shown { display: inline-flex; }
+  .film-toggle:hover { border-color: var(--marker); }
+  .film-toggle i {
+    width: 9px;
+    height: 10px;
+    display: block;
+    border-left: 3px solid var(--marker);
+    border-right: 3px solid var(--marker);
+    font-style: normal;
+  }
+  .film-toggle.paused i {
+    border: 0;
+    width: 0;
+    height: 0;
+    border-left: 9px solid var(--marker);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+  }
+
+  /* scrims: type legible on the left, the picture still readable on the right */
+  .hero-media::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(97deg,
+        var(--ink) 0%,
+        color-mix(in srgb, var(--ink) 94%, transparent) 30%,
+        color-mix(in srgb, var(--ink) 66%, transparent) 56%,
+        color-mix(in srgb, var(--ink) 34%, transparent) 84%),
+      linear-gradient(to top,
+        var(--ink) 0%,
+        color-mix(in srgb, var(--ink) 40%, transparent) 26%,
+        transparent 62%);
+  }
+  /* a fine sensor grid — the camera's view of the table */
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: .5;
+    background-image:
+      linear-gradient(to right, color-mix(in srgb, var(--marker) 26%, transparent) 1px, transparent 1px),
+      linear-gradient(to bottom, color-mix(in srgb, var(--marker) 26%, transparent) 1px, transparent 1px);
+    background-size: 84px 84px;
+    -webkit-mask-image: radial-gradient(120% 90% at 78% 42%, #000 0%, transparent 62%);
+            mask-image: radial-gradient(120% 90% at 78% 42%, #000 0%, transparent 62%);
+  }
+  .hero .wrap {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    padding-block: 72px 56px;
+  }
+  .eyebrow {
+    font-family: var(--f-mono);
+    font-size: 11.5px;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--on-ink-dim);
+    margin: 0 0 20px;
+  }
+  .eyebrow b { color: var(--marker); font-weight: 500; }
+  h1 {
+    margin: 0;
+    font-size: clamp(2.3rem, 6.2vw, 4rem);
+    font-weight: 700;
+    line-height: 1.02;
+    letter-spacing: -.025em;
+    max-width: 16ch;
+  }
+  h1 em {
+    display: block;
+    font-family: var(--f-body);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(1.05rem, 2.4vw, 1.45rem);
+    letter-spacing: 0;
+    line-height: 1.35;
+    color: var(--on-ink-dim);
+    margin-top: 18px;
+    max-width: 40ch;
+  }
+  .standfirst {
+    margin: 26px 0 0;
+    max-width: 52ch;
+    font-size: 1.06rem;
+    color: #C9D6DC;
+  }
+  .herolinks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 30px;
+  }
+  .herolinks a {
+    font-family: var(--f-display);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: .01em;
+    text-decoration: none;
+    color: var(--on-ink);
+    border: 1px solid var(--on-ink-line);
+    background: color-mix(in srgb, var(--ink-2) 70%, transparent);
+    padding: 9px 15px;
+    border-radius: 3px;
+  }
+  .herolinks a:hover { border-color: var(--marker); color: #fff; }
+  .herolinks a.primary { background: var(--marker); border-color: var(--marker); color: #1A1204; }
+  .herolinks a.primary:hover { filter: brightness(1.08); }
+
+  /* ---------- content ---------- */
+
+  main .wrap { padding-block: 0; max-width: 960px; }
+
+  section { border-top: 1px solid var(--line-soft); }
+  section:first-of-type { border-top: 0; }
+  .sec-inner { padding-block: 54px; max-width: var(--col); }
+  .sec-inner.wide { max-width: none; }
+
+  .sec-label {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .sec-num {
+    font-family: var(--f-mono);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: .06em;
+  }
+  .sec-kicker {
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  h2 {
+    margin: 0 0 20px;
+    font-size: clamp(1.5rem, 3.4vw, 2rem);
+    font-weight: 600;
+    letter-spacing: -.018em;
+    line-height: 1.16;
+  }
+  p { margin: 0 0 18px; }
+  p:last-child { margin-bottom: 0; }
+
+  .lede { font-size: 1.1rem; }
+
+  .figure-note {
+    margin: 26px 0;
+    padding: 18px 20px;
+    border-left: 2px solid var(--marker);
+    background: var(--surface);
+    font-family: var(--f-display);
+    font-size: 1.02rem;
+    line-height: 1.45;
+  }
+  .figure-note b {
+    font-family: var(--f-mono);
+    font-weight: 500;
+    color: var(--marker);
+    font-size: .95em;
+  }
+
+  .scene {
+    margin: 26px 0;
+    padding: 20px 22px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 1rem;
+  }
+  .scene p:last-child { margin-bottom: 0; }
+  .scene strong { font-style: normal; color: var(--text); font-weight: 600; }
+
+  figure.shot { margin: 30px 0 0; }
+  figure.shot img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    border: 1px solid var(--line);
+  }
+  figure.shot figcaption {
+    margin-top: 10px;
+    font-family: var(--f-mono);
+    font-size: 11.5px;
+    letter-spacing: .04em;
+    color: var(--muted);
+  }
+
+  /* ---------- work entries ---------- */
+
+  .repos { display: flex; flex-direction: column; gap: 0; margin-top: 30px; }
+
+  article.repo {
+    padding-block: 26px;
+    border-top: 1px solid var(--line);
+  }
+  article.repo:last-child { border-bottom: 1px solid var(--line); }
+
+  .repo-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 10px 14px;
+    margin-bottom: 10px;
+  }
+  .repo-name {
+    font-family: var(--f-display);
+    font-size: 1.06rem;
+    font-weight: 600;
+    letter-spacing: -.012em;
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  }
+  .repo-name:hover { border-bottom-color: currentColor; }
+  .repo-role {
+    font-family: var(--f-display);
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 2px 7px;
+  }
+  .repo p { font-size: .98rem; margin-bottom: 12px; }
+
+  .transfer {
+    margin: 14px 0 12px;
+    padding: 13px 16px;
+    background: var(--accent-bg);
+    border-radius: 3px;
+    font-size: .94rem;
+    line-height: 1.55;
+  }
+  .transfer .tag {
+    font-family: var(--f-display);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .cite {
+    font-size: .88rem;
+    font-style: italic;
+    color: var(--muted);
+    line-height: 1.5;
+    margin: 10px 0 0;
+    padding-left: 14px;
+    border-left: 1px solid var(--line);
+  }
+  .cite + .cite { margin-top: 7px; }
+  .cite a { font-style: normal; }
+
+  .also {
+    font-size: .9rem;
+    color: var(--muted);
+    margin-top: 12px;
+  }
+  .also b {
+    font-family: var(--f-mono);
+    font-weight: 500;
+    font-size: .92em;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ---------- videos ---------- */
+
+  .videos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-top: 30px;
+  }
+  .vid { margin: 0; }
+  .vid .frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: var(--ink-2);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    display: block;
+    padding: 0;
+  }
+  .vid .frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    opacity: .82;
+    transition: opacity .2s, transform .35s;
+  }
+  .vid .frame:hover img { opacity: 1; transform: scale(1.02); }
+  .vid .frame iframe { width: 100%; height: 100%; border: 0; display: block; }
+  .vid .play {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+  }
+  .vid .play span {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--marker) 92%, transparent);
+    display: grid;
+    place-items: center;
+    box-shadow: 0 3px 16px rgba(0,0,0,.4);
+  }
+  .vid .play span::after {
+    content: "";
+    width: 0; height: 0;
+    border-left: 15px solid #1A1204;
+    border-top: 9px solid transparent;
+    border-bottom: 9px solid transparent;
+    margin-left: 4px;
+  }
+  .vid figcaption {
+    margin-top: 10px;
+    font-size: .93rem;
+    line-height: 1.45;
+    color: var(--muted);
+  }
+  .vid figcaption b {
+    display: block;
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: .98rem;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  /* ---------- team ---------- */
+
+  .team {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 28px 18px;
+    margin-top: 30px;
+  }
+  @media (max-width: 900px) { .team { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 520px) { .team { grid-template-columns: repeat(2, 1fr); } }
+  .person { text-align: center; }
+  .person img {
+    width: 92px;
+    height: 92px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    margin: 0 auto 12px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    filter: grayscale(1);
+    transition: filter .25s;
+  }
+  .person:hover img { filter: grayscale(0); }
+  .person a {
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: .97rem;
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+  .person .name-plain {
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: .97rem;
+    color: var(--text);
+  }
+  .person p {
+    margin: 5px 0 0;
+    font-size: .85rem;
+    line-height: 1.4;
+    color: var(--muted);
+  }
+  .also-people {
+    margin-top: 28px;
+    font-size: .93rem;
+    color: var(--muted);
+  }
+
+  /* ---------- media ---------- */
+
+  .press { margin-top: 30px; display: flex; flex-direction: column; }
+  .press article {
+    padding-block: 20px;
+    border-top: 1px solid var(--line);
+  }
+  .press article:last-child { border-bottom: 1px solid var(--line); }
+  .press .outlet {
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--marker);
+    margin: 0 0 5px;
+  }
+  .press h3 {
+    margin: 0 0 7px;
+    font-size: 1.02rem;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -.01em;
+  }
+  .press h3 a { text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); }
+  .press p { font-size: .94rem; color: var(--muted); margin: 0; }
+
+  .award {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--marker);
+    border-radius: 4px;
+    padding: 20px 22px;
+    margin-top: 6px;
+  }
+  .award h3 { margin: 0 0 8px; font-size: 1.06rem; font-weight: 600; }
+  .award p { font-size: .96rem; margin: 0; }
+
+  /* ---------- footer ---------- */
+
+  footer {
+    background: var(--ink);
+    color: var(--on-ink-dim);
+    border-top: 1px solid var(--on-ink-line);
+    margin-top: 10px;
+  }
+  footer .wrap { padding-block: 44px 40px; }
+  footer h3 {
+    font-size: 12px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--on-ink);
+    margin: 0 0 14px;
+    font-weight: 600;
+  }
+  .foot-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 34px;
+  }
+  footer p { font-size: .93rem; line-height: 1.6; }
+  footer a { color: #A9CBDB; }
+  footer a:hover { color: #fff; }
+
+  .partners {
+    margin-top: 38px;
+    padding-top: 28px;
+    border-top: 1px solid var(--on-ink-line);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+  }
+  .partners a, .partners span {
+    background: #fff;
+    border-radius: 3px;
+    padding: 10px 14px;
+    display: grid;
+    place-items: center;
+    min-height: 72px;
+  }
+  .partners img {
+    display: block;
+    max-height: 52px;
+    width: auto;
+    max-width: 162px;
+  }
+  .colophon {
+    margin-top: 34px;
+    padding-top: 18px;
+    border-top: 1px solid var(--on-ink-line);
+    font-family: var(--f-mono);
+    font-size: 11.5px;
+    letter-spacing: .03em;
+    color: var(--on-ink-dim);
+  }
+
+  @media (max-width: 720px) {
+    body { font-size: 16.5px; }
+    .hero { min-height: clamp(420px, 66vh, 620px); }
+    .hero .wrap { padding-block: 46px 42px; }
+    .sec-inner { padding-block: 42px; }
+    .mark { font-size: 12px; }
+    .hero-still {
+      object-position: 58% 32%;
+      filter: grayscale(.3) contrast(1.05) brightness(.95);
+    }
+    .hero-grid { background-size: 56px 56px; opacity: .3; }
+    .hero-media::after {
+      background: linear-gradient(to top,
+        var(--ink) 0%,
+        color-mix(in srgb, var(--ink) 93%, transparent) 46%,
+        color-mix(in srgb, var(--ink) 80%, transparent) 78%,
+        color-mix(in srgb, var(--ink) 62%, transparent) 100%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+    .hero-still { transform: scale(1.04); }
+  }
+  html { scroll-behavior: smooth; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <a class="mark" href="#top">FeedBot <span> </span></a>
+    <nav class="sections" aria-label="Sections">
+      <a href="#project">Project</a>
+      <a href="#planning">Planning</a>
+      <a href="#vision">Vision</a>
+      <a href="#motion">Motion</a>
+      <a href="#videos">Videos</a>
+      <a href="#team">Team</a>
+      <a href="#media">Media</a>
+    </nav>
+  </div>
+</header>
+
+<div class="hero" id="top">
+  <div class="hero-media" aria-hidden="true">
+    <img class="hero-still" src="img/hero.jpg" alt="">
+    <video class="hero-film" id="film" muted loop playsinline preload="none" disablepictureinpicture></video>
+    <div class="hero-grid"></div>
+  </div>
+  <button class="film-toggle" id="film-toggle" type="button" aria-label="Pause the background video"><i></i>Pause</button>
+  <div class="wrap">
+    <p class="eyebrow"> Institute for Systems and Robotics · Instituto Superior Técnico <b>— with CMU and M-ITI</b></p>
+    <h1>
+      A robot that eats with you.
+      <em>FeedBot — a symbiotic autonomous robotic arm for meal assistance to motion-impaired people.</em>
+    </h1>
+    <p class="standfirst">
+      Existing feeding assistants scoop blind and deliver to a fixed point in space, leaving the
+      user to reach the spoon. FeedBot is tasked by a vision system, verifies what it has picked
+      up, and carries the food all the way to a mouth that will not hold still.
+    </p>
+    <div class="herolinks">
+      <a class="primary" href="#videos">Watch it work</a>
+      <a href="#planning">Publications</a>
+      <a href="mailto:manuel.marques@tecnico.ulisboa.pt">Contact</a>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div class="wrap">
+
+    <section id="project">
+      <div class="sec-inner">
+        <div class="sec-label">
+          <span class="sec-num">00</span>
+          <span class="sec-kicker">The project</span>
+        </div>
+        <h2>The one daily activity that cannot be postponed</h2>
+        <p class="lede">
+          Eating is the activity that most reliably requires another person. For someone living with
+          cerebral palsy, Parkinson's disease or the aftermath of a stroke, lack of fine motor control
+          and involuntary movement of the arm and head frustrate every attempt to feed themselves —
+          and without a robot, every meal needs full human assistance.
+        </p>
+        <p>
+          <strong>FeedBot</strong> proposes a fully autonomous mobile arm capable of feeding people with
+          disabilities, tasked by a vision system rather than by a button, and learning and adapting to
+          each individual. Commercial feeding assistants acquire food without any feedback on whether
+          they succeeded, and move to a preprogrammed location to deliver it. FeedBot instead watches:
+          it confirms the spoon is loaded, tracks the user's head, and shapes its approach around that
+          person's own movement.
+        </p>
+
+        <div class="scene">
+          <p>
+            <strong>Our vision.</strong> Manuel is having lunch. He asks the waiter to open his case,
+            clamp FeedBot — arm, camera and computer — to the table, and place his meal in the small
+            containers of the special plate. The robot waits until he rotates his head and fixates the
+            container with rice, peas and salmon. It scoops a full spoon and moves towards his mouth.
+          </p>
+          <p>
+            Because of his involuntary movements, the robot cannot stand still and wait for him to
+            reach it; it must track his head and slowly approach. And because FeedBot has learned a
+            model of his reflexes — knowing that he twists his head right when he wants to move
+            forward — it pulls back to a safer position until his head returns to the forward
+            direction.
+          </p>
+        </div>
+
+        <p>
+          The system was developed with, and evaluated at, the <strong>Centro de Reabilitação de
+          Paralisia Cerebral Calouste Gulbenkian</strong> (Santa Casa da Misericórdia de Lisboa). Its
+          three technical layers — reactive planning, vision in the loop, and a model of the user's
+          own motion — are described below.
+        </p>
+
+        <figure class="shot">
+          <img src="img/feedbot.jpg" alt="The FeedBot robotic arm positioned beside a plate during a meal">
+          <figcaption>FeedBot — a modular arm, a camera and a computer that clamp to an ordinary table.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="planning">
+      <div class="sec-inner">
+        <div class="sec-label">
+          <span class="sec-num">01</span>
+          <span class="sec-kicker">Reactive planning</span>
+        </div>
+        <h2>Tracking a goal that moves, while carrying food</h2>
+        <p>
+          Assisted feeding is a tracking task with an unforgiving failure mode: the end effector is
+          carrying food, the goal is a person's face, and the goal moves unpredictably. A scripted
+          trajectory cannot survive that. The planning has to be closed-loop, and it has to become
+          more conservative exactly where a mistake would matter most.
+        </p>
+
+        <div class="figure-note">
+          Update the trajectory at a rate set by the moving goal, and let explicit risk regions shape
+          the approach as the spoon nears the face.
+          <b>scripted path → closed loop</b>
+        </div>
+
+        <div class="repos">
+          <article class="repo">
+            <div class="repo-head">
+              <a class="repo-name" href="http://users.isr.ist.utl.pt/~manuel/pubs/feedbot17.pdf">Feedbot — A Robotic Arm for Autonomous Assisted Feeding</a>
+              <span class="repo-role">EPIA 2017</span>
+            </div>
+            <p>
+              The act of assisted feeding is a challenging task that requires a good reactive planning
+              strategy to cope with an unpredictable environment. It can be seen as a tracking task,
+              where some end effector must travel to a moving goal. This work builds on state-of-the-art
+              algorithms such as <strong>Discriminative Optimization</strong>, using a Kinect camera and
+              a modular robotic arm to implement a closed-form system that performs assisted feeding. It
+              presents two approaches: a <strong>variable-rate function</strong> for updating the
+              trajectory with information on the moving goal, and the definition of
+              <strong>risk regions</strong> that shape a safer trajectory.
+            </p>
+            <p class="also"><b>Demo</b> — <a href="https://www.youtube.com/watch?v=8LqCxX01kd0">video</a></p>
+            <p class="cite">
+              C. Silva, J. Vongkulbhisal, M. Marques, J. P. Costeira, M. Veloso, “Feedbot — A Robotic Arm
+              for Autonomous Assisted Feeding”, Progress in Artificial Intelligence (EPIA 2017), LNCS,
+              pp. 486–497. <a href="https://doi.org/10.1007/978-3-319-65340-2_40">doi:10.1007/978-3-319-65340-2_40</a>
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="vision">
+      <div class="sec-inner">
+        <div class="sec-label">
+          <span class="sec-num">02</span>
+          <span class="sec-kicker">Vision in the loop</span>
+        </div>
+        <h2>Did it actually pick anything up?</h2>
+        <p>
+          A feeding robot fails in two places, and both are invisible to an open-loop device: the spoon
+          can come up empty, and the mouth is never quite where the program assumed it would be. Vision
+          closes both ends of the motion.
+        </p>
+
+        <div class="repos">
+          <article class="repo">
+            <div class="repo-head">
+              <a class="repo-name" href="https://openaccess.thecvf.com/content_ECCVW_2018/papers/11134/Candeias_Vision_Augmented_Robot_Feeding_ECCVW_2018_paper.pdf">Vision Augmented Robot Feeding</a>
+              <span class="repo-role">ACVR · ECCV Workshops 2018</span>
+            </div>
+            <p>
+              Researchers have over time developed robotic feeding assistants so that people with
+              disabilities can live more autonomous lives. Current commercial assistants acquire food
+              without feedback on acquisition success, and move to a preprogrammed location to deliver
+              it. This work evaluates how vision improves both halves. We show that
+              <strong>visual feedback on whether food was captured increases acquisition
+              efficiency</strong>, and how <strong>Discriminative Optimization</strong> can be used in
+              tracking so that the food is brought all the way to the user's mouth rather than to a
+              preprogrammed feeding location.
+            </p>
+            <p class="also"><b>Demo</b> — <a href="https://www.youtube.com/watch?v=X7McqWk1AK8">video</a></p>
+            <p class="also">
+              <b>See also</b> —
+              <a href="https://fenix.tecnico.ulisboa.pt/downloadFile/844820067125973/Master_s_Thesis___Feedbot.pdf">A. Candeias, “Feedbot: A Vision Augmented Feeding Robot”</a>,
+              MSc thesis, IST, October 2018.
+            </p>
+            <p class="cite">
+              A. Candeias, T. Rhodes, M. Marques, J. P. Costeira, M. Veloso, “Vision Augmented Robot
+              Feeding”, 6th International Workshop on Assistive Computer Vision and Robotics (ACVR),
+              ECCV Workshops 2018.
+              <a href="https://doi.org/10.1007/978-3-030-11024-6_4">doi:10.1007/978-3-030-11024-6_4</a>
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="motion">
+      <div class="sec-inner">
+        <div class="sec-label">
+          <span class="sec-num">03</span>
+          <span class="sec-kicker">Understanding the user</span>
+        </div>
+        <h2>Learning the person the robot is feeding</h2>
+        <p>
+          A robot that adapts to an individual first has to describe that individual. Involuntary
+          movement is not noise to be filtered out — it is structure, and it is specific to each
+          person. Measuring it from an ordinary camera, while the face is partly occluded by the very
+          movements being measured, is the problem this layer solves.
+        </p>
+
+        <div class="repos">
+          <article class="repo">
+            <div class="repo-head">
+              <a class="repo-name" href="http://users.isr.ist.utl.pt/~manuel/pubs/icorr19.pdf">Motion Analysis for People with Cerebral Palsy: A Vision Based Approach</a>
+              <span class="repo-role">IEEE ICORR 2019</span>
+            </div>
+            <p>
+              We propose a methodology to classify the motion of subjects with cerebral palsy based on
+              RGB image sequences, and present a new dataset with 2D facial landmark trajectories from
+              images of people with and without disabilities performing specific types of movements.
+              Depending on those movements parts of the face become occluded, so the 3D face shape and
+              its motion are recovered within the <strong>Structure-from-Motion</strong> framework. From
+              that structure and motion we propose two descriptors — one for the
+              <strong>spatial</strong> distribution of the motion, one for the
+              <strong>temporal</strong> — discuss their physical meaning, and show they are very
+              informative about the degree of the subjects' disabilities, classifying people with and
+              without cerebral palsy from 2D image sequences alone.
+            </p>
+            <div class="transfer">
+              <span class="tag">Why it matters for the robot</span>
+              The same descriptors that grade disability from video are what let FeedBot build a model
+              of an individual's reflexes — and therefore anticipate a head that twists right before it
+              moves forward, instead of merely reacting to it.
+            </div>
+            <p class="also"><b>Demo</b> — <a href="https://www.youtube.com/watch?v=2eC-cCvw5yg">video</a></p>
+            <p class="also">
+              <b>See also</b> —
+              <a href="https://fenix.tecnico.ulisboa.pt/downloadFile/1689244997258819/Thesis_Mario_Macedo.pdf">M. Macedo, “Clustering of movement profiles of motor-impaired people from 2D image streams”</a>,
+              MSc thesis, IST, November 2018.
+            </p>
+            <p class="cite">
+              M. Macedo, A. Candeias, M. Marques, “Motion Analysis for People with Cerebral Palsy: A
+              Vision Based Approach”, IEEE 16th International Conference on Rehabilitation Robotics
+              (ICORR), 2019.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="videos">
+      <div class="sec-inner wide">
+        <div class="sec-label">
+          <span class="sec-num">04</span>
+          <span class="sec-kicker">Demonstrations</span>
+        </div>
+        <h2>The robot at a meal</h2>
+        <div class="videos">
+
+          <figure class="vid">
+            <button class="frame" type="button" data-yt="bL26n_ZI490" aria-label="Play: FeedBot at a meal">
+              <img loading="lazy" src="https://i.ytimg.com/vi/bL26n_ZI490/hqdefault.jpg" alt="">
+              <span class="play"><span></span></span>
+            </button>
+            <figcaption><b>FeedBot at a meal</b>Tracking the user's head and delivering the spoon.</figcaption>
+          </figure>
+
+          <figure class="vid">
+            <button class="frame" type="button" data-yt="8LqCxX01kd0" aria-label="Play: reactive planning with risk regions">
+              <img loading="lazy" src="https://i.ytimg.com/vi/8LqCxX01kd0/hqdefault.jpg" alt="">
+              <span class="play"><span></span></span>
+            </button>
+            <figcaption><b>Reactive planning</b>Variable-rate trajectory updates and risk regions — EPIA 2017.</figcaption>
+          </figure>
+
+          <figure class="vid">
+            <button class="frame" type="button" data-yt="X7McqWk1AK8" aria-label="Play: vision-augmented acquisition and delivery">
+              <img loading="lazy" src="https://i.ytimg.com/vi/X7McqWk1AK8/hqdefault.jpg" alt="">
+              <span class="play"><span></span></span>
+            </button>
+            <figcaption><b>Vision augmented feeding</b>Acquisition feedback and tracked delivery — ECCV Workshops 2018.</figcaption>
+          </figure>
+
+          <figure class="vid">
+            <button class="frame" type="button" data-yt="2eC-cCvw5yg" aria-label="Play: motion analysis under occlusion">
+              <img loading="lazy" src="https://i.ytimg.com/vi/2eC-cCvw5yg/hqdefault.jpg" alt="">
+              <span class="play"><span></span></span>
+            </button>
+            <figcaption><b>Motion analysis</b>3D facial shape and motion under occlusion — ICORR 2019.</figcaption>
+          </figure>
+
+          <figure class="vid">
+            <button class="frame" type="button" data-yt="fICmn8_QgIA" aria-label="Play: additional FeedBot footage">
+              <img loading="lazy" src="https://i.ytimg.com/vi/fICmn8_QgIA/hqdefault.jpg" alt="">
+              <span class="play"><span></span></span>
+            </button>
+            <figcaption><b>More footage</b>The arm in operation.</figcaption>
+          </figure>
+
+        </div>
+      </div>
+    </section>
+
+    <section id="team">
+      <div class="sec-inner wide">
+        <div class="sec-label">
+          <span class="sec-num">05</span>
+          <span class="sec-kicker">The team</span>
+        </div>
+        <h2>Three institutions, one table</h2>
+        <div class="team">
+          <div class="person">
+            <img loading="lazy" src="img/team/manuel-marques.jpg" alt="">
+            <a href="http://users.isr.ist.utl.pt/~manuel/">Manuel Marques</a>
+            <p>Researcher, ISR / IST<br>Principal investigator</p>
+          </div>
+          <div class="person">
+            <img loading="lazy" src="img/team/manuela-veloso.jpg" alt="">
+            <a href="http://www.cs.cmu.edu/~mmv/">Manuela M. Veloso</a>
+            <p>Professor<br>Carnegie Mellon University</p>
+          </div>
+          <div class="person">
+            <img loading="lazy" src="img/team/joao-costeira.jpg" alt="">
+            <a href="http://users.isr.ist.utl.pt/~jpc/">João Paulo Costeira</a>
+            <p>Professor, ISR / IST</p>
+          </div>
+          <div class="person">
+            <img loading="lazy" src="img/team/nuno-nunes.png" alt="">
+            <a href="http://nunonunes.info/">Nuno Nunes</a>
+            <p>Professor, IST<br>ITI / Madeira-ITI</p>
+          </div>
+          <div class="person">
+            <img loading="lazy" src="img/team/alexandre-candeias.jpg" alt="">
+            <span class="name-plain">Alexandre Candeias</span>
+            <p>ISR / IST</p>
+          </div>
+          <div class="person">
+            <img loading="lazy" src="img/team/travers-rhodes.jpg" alt="">
+            <a href="https://www.traversrhodes.com/">Travers Rhodes</a>
+            <p>Carnegie Mellon University</p>
+          </div>
+        </div>
+        <p class="also-people">
+          With contributions from Catarina Silva, Jayakorn Vongkulbhisal and Mário Macedo.
+        </p>
+      </div>
+    </section>
+
+    <section id="media">
+      <div class="sec-inner">
+        <div class="sec-label">
+          <span class="sec-num">06</span>
+          <span class="sec-kicker">Recognition and media</span>
+        </div>
+        <h2>Outside the lab</h2>
+
+        <div class="award">
+          <h3>“Os Melhores do Portugal Tecnológico” 2019 — honourable mention</h3>
+          <p>
+            Awarded by <em>Exame Informática</em> to distinguish researchers still unknown to the
+            general public, ideas put to the test in universities, and companies doing most for the
+            environment and sustainability.
+            <a href="https://visao.sapo.pt/exameinformatica/noticias-ei/mercados/2019-05-09-premios-os-melhores-do-portugal-tecnologico-conheca-a-lista-de-vencedores-1/">Winners</a>
+          </p>
+        </div>
+
+        <div class="press">
+          <article>
+            <p class="outlet">DN Insider</p>
+            <h3><a href="https://insider.dn.pt/featured/reportagem-robotica-em-portugal/">Robótica em Portugal: “Olá, sou um robô, estou aqui para mudar a sua vida”</a></h3>
+            <p>
+              In the era of robotics associated with increasingly intelligent systems, a tour of the
+              most exciting robot projects made in Portugal — from interaction with children and
+              seniors to underwater robots — and a conversation with the experts about the future.
+            </p>
+          </article>
+
+          <article>
+            <p class="outlet">Exame Informática</p>
+            <h3><a href="https://visao.sapo.pt/exameinformatica/noticias-ei/hardware/2019-02-27-Feedbot-o-braco-robotico-que-alimenta-pessoas-e-sonhos/">Feedbot: o braço robótico que alimenta pessoas e sonhos</a></h3>
+            <p>
+              Patients at the Calouste Gulbenkian Rehabilitation Centre for Cerebral Palsy will soon
+              test a robotic arm developed between Instituto Superior Técnico, the Madeira Interactive
+              Technologies Institute and Carnegie Mellon University. Meet the researcher who created
+              FeedBot to help with daily meals.
+            </p>
+          </article>
+
+          <article>
+            <p class="outlet">Exame Informática</p>
+            <h3><a href="https://visao.sapo.pt/exameinformatica/noticias-ei/ciencia-ei/2019-01-29-feedbot-um-braco-robotico-para-autonomizar-doentes-com-dificuldades-de-mobilidade-durante-as-refeicoes/">Feedbot: um braço robótico para autonomizar doentes com dificuldades de mobilidade durante as refeições</a></h3>
+            <p>
+              The project is led by four Portuguese researchers and is the result of a partnership
+              between the Institute for Systems and Robotics of Instituto Superior Técnico and
+              Carnegie Mellon University.
+            </p>
+          </article>
+
+          <article>
+            <p class="outlet">Técnico Lisboa</p>
+            <h3><a href="https://tecnico.ulisboa.pt/en/noticias/feedbot-o-braco-robotico-que-ajuda-a-alimentar-pessoas-com-problemas-de-mobilidade/">Feedbot: o braço robótico que ajuda a alimentar pessoas com problemas de mobilidade</a></h3>
+            <p>
+              The robotic arm was developed by a research team from Instituto Superior Técnico, the
+              Madeira Interactive Technologies Institute (M-ITI) and Carnegie Mellon University.
+            </p>
+          </article>
+
+          <article>
+            <p class="outlet">Antena 1</p>
+            <h3>João Paulo Costeira — Feedbot, o braço robótico que ajuda a alimentar pessoas com deficiência motora</h3>
+            <p>
+              On the computer vision algorithms that let the arm follow the user's movements, and what
+              it takes to put a robot on the table of someone who needs it.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <h3>Who</h3>
+        <p>
+          <a href="https://isr.tecnico.ulisboa.pt/">Institute for Systems and Robotics</a><br>
+          <a href="https://tecnico.ulisboa.pt/">Instituto Superior Técnico</a>, Universidade de Lisboa<br>
+          with <a href="https://www.cmu.edu/">Carnegie Mellon University</a> and
+          <a href="https://iti.larsys.pt/">ITI</a> (formerly Madeira-ITI)
+        </p>
+      </div>
+      <div>
+        <h3>Contact</h3>
+        <p>
+          Manuel Marques<br>
+          <a href="mailto:manuel.marques@tecnico.ulisboa.pt">manuel.marques@tecnico.ulisboa.pt</a><br>
+          <a href="http://users.isr.ist.utl.pt/~manuel/">users.isr.ist.utl.pt/~manuel</a>
+        </p>
+      </div>
+      <div>
+        <h3>Funding</h3>
+        <p>
+          Supported by <a href="http://www.fct.pt">FCT — Fundação para a Ciência e a Tecnologia</a>
+          through the <a href="https://www.cmuportugal.org/">Carnegie Mellon Portugal Program</a>.
+          Developed with the Centro de Reabilitação de Paralisia Cerebral Calouste Gulbenkian.
+        </p>
+      </div>
+    </div>
+
+    <div class="partners">
+      <a href="https://isr.tecnico.ulisboa.pt/"><img src="img/isr.png" alt="Institute for Systems and Robotics"></a>
+      <a href="https://tecnico.ulisboa.pt/"><img src="img/ist.png" alt="Instituto Superior Técnico"></a>
+      <a href="https://www.cmu.edu/"><img src="img/cmu.png" alt="Carnegie Mellon University"></a>
+      <a href="https://iti.larsys.pt/"><img src="img/m-iti.png" alt="Interactive Technologies Institute, formerly Madeira-ITI"></a>
+      <a href="http://www.fct.pt"><img src="img/fct.png" alt="FCT — Fundação para a Ciência e a Tecnologia"></a>
+      <a href="https://www.cmuportugal.org/"><img src="img/cmu-portugal.png" alt="Carnegie Mellon Portugal Program"></a>
+    </div>
+
+    <p class="colophon">FEEDBOT — IST / ISR · CMU · M-ITI · A symbiotic robotic arm for meal assistance</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  /* ---- hero: the film, loaded quietly behind the still ---- */
+  var film = document.getElementById('film');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var narrow = window.matchMedia('(max-width: 860px)').matches;
+
+  var toggle = document.getElementById('film-toggle');
+
+  if (film && toggle && !reduce && !narrow) {
+
+    film.addEventListener('playing', function () {
+      film.classList.add('on');
+      toggle.classList.add('shown');
+    }, { once: true });
+
+    /* a failed load leaves the still in place, and no orphan control */
+    film.addEventListener('error', function () {
+      film.classList.remove('on');
+      toggle.classList.remove('shown');
+    });
+
+    var start = function () {
+      [['img/hero.webm', 'video/webm'], ['img/hero.mp4', 'video/mp4']].forEach(function (s) {
+        var el = document.createElement('source');
+        el.src = s[0];
+        el.type = s[1];
+        film.appendChild(el);
+      });
+      film.load();
+      var p = film.play();
+      if (p && p.catch) { p.catch(function () { /* blocked: the still stays */ }); }
+    };
+
+    if (document.readyState === 'complete') { setTimeout(start, 400); }
+    else { window.addEventListener('load', function () { setTimeout(start, 400); }); }
+
+    toggle.addEventListener('click', function () {
+      if (film.paused) {
+        film.play();
+        toggle.classList.remove('paused');
+        toggle.lastChild.nodeValue = 'Pause';
+        toggle.setAttribute('aria-label', 'Pause the background video');
+      } else {
+        film.pause();
+        toggle.classList.add('paused');
+        toggle.lastChild.nodeValue = 'Play';
+        toggle.setAttribute('aria-label', 'Play the background video');
+      }
+    });
+
+    /* don't decode video the reader cannot see */
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) { film.pause(); }
+      else if (!toggle.classList.contains('paused')) { film.play(); }
+    });
+  }
+
+
+  /* ---- click-to-load video embeds ---- */
+  document.querySelectorAll('.vid .frame').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var id = btn.getAttribute('data-yt');
+      if (!id) return;
+      var f = document.createElement('iframe');
+      f.src = 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0';
+      f.title = btn.getAttribute('aria-label') || 'FeedBot video';
+      f.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture';
+      f.allowFullscreen = true;
+      btn.replaceChildren(f);
+      btn.style.cursor = 'default';
+    });
+  });
+
+  /* ---- section highlighting in the top bar ---- */
+  var links = Array.prototype.slice.call(document.querySelectorAll('nav.sections a'));
+  var map = {};
+  links.forEach(function (a) { map[a.getAttribute('href').slice(1)] = a; });
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        links.forEach(function (a) { a.classList.remove('active'); });
+        var a2 = map[e.target.id];
+        if (a2) a2.classList.add('active');
+      });
+    }, { rootMargin: '-45% 0px -50% 0px' });
+    Object.keys(map).forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) io.observe(el);
+    });
+  }
+})();
+</script>
+</body>
+</html>
